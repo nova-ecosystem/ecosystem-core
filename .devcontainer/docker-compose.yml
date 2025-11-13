@@ -1,0 +1,55 @@
+# This is a DEVELOPMENT-ONLY file for use with DevContainers.
+version: '3.8'
+services:
+  website:
+    build:
+      context: ../website
+      dockerfile: Dockerfile.dev
+    volumes:
+      # Mounts the website code for hot-reloading
+      - ../website:/workspaces/ecosystem-core/website:cached
+    ports:
+      - "3000:3000"
+    command: yarn start
+
+  app:
+    build:
+      context: ../app
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ../app:/workspaces/ecosystem-core/app:cached
+      - ../tests:/workspaces/ecosystem-core/tests:cached
+    ports:
+      - "8080:8080"
+    environment:
+      - FLASK_ENV=development
+      - API_URL=http://api:8000
+      - AUTH_URL=http://auth:9000
+    depends_on:
+      - api
+      - auth
+    command: flask --app src/main run --host=0.0.0.0 --port=8080 --reload
+
+  api:
+    build:
+      context: ../api
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ../api:/workspaces/ecosystem-core/api:cached
+    ports:
+      - "8000:8000"
+    environment:
+      - FLASK_ENV=development
+    command: flask --app src/main run --host=0.0.0.0 --port=8000 --reload
+
+  auth:
+    build:
+      context: ../auth
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ../auth:/workspaces/ecosystem-core/auth:cached
+    ports:
+      - "9000:9000"
+    environment:
+      - FLASK_ENV=development
+    command: flask --app src/main run --host=0.0.0.0 --port=9000 --reload

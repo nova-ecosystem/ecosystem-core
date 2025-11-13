@@ -1,0 +1,37 @@
+{
+    "name": "Nova Ecosystem Core",
+    // Use docker-compose to launch all services
+    "dockerComposeFile": "docker-compose.yml",
+    // The service VS Code should "attach" to
+    "service": "app",
+    "workspaceFolder": "/workspaces/ecosystem-core/app",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python",
+                "ms-python.vscode-pylance",
+                "ms-vscode.docker",
+                "github.vscode-pull-request-github",
+                "esbenp.prettier-vscode",
+                "eamodio.gitlens"
+            ],
+            "settings": {
+                "python.defaultInterpreterPath": "/usr/local/bin/python",
+                "python.testing.pytestArgs": [
+                    "../tests"
+                ],
+                "python.testing.unittestEnabled": false,
+                "python.testing.pytestEnabled": true
+            }
+        }
+    },
+    // Forward all ports for all services
+    "forwardPorts": [
+        3000, // website
+        8000, // api
+        8080, // app
+        9000 // auth
+    ],
+    // Run this command after the container is built
+    "postCreateCommand": "pip install -r ../tests/requirements.txt"
+}

@@ -1,0 +1,69 @@
+name: CI (Pull Request)
+
+on:
+  pull_request:
+    paths:
+      - 'api/**'
+      - 'app/**'
+      - 'auth/**'
+      - 'website/**'
+      - 'tests/**'
+
+jobs:
+  test-api:
+    runs-on: ubuntu-latest
+    if: |
+      contains(github.event.pull_request.head.ref, 'api/') ||
+      contains(github.event.pull_request.head.ref, 'tests/api/')
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install -r api/src/requirements.txt
+      - name: Run API tests
+        run: pytest tests/api/
+
+  test-app:
+    runs-on: ubuntu-latest
+    if: |
+      contains(github.event.pull_request.head.ref, 'app/') ||
+      contains(github.event.pull_request.head.ref, 'tests/app/')
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install -r app/src/requirements.txt
+      - name: Run App tests
+        run: pytest tests/app/
+
+  test-auth:
+    # ... (similar to test-api and test-app) ...
+
+  build-website:
+    runs-on: ubuntu-latest
+    if: |
+      contains(github.event.pull_request.head.ref, 'website/')
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: Install dependencies
+        run: cd website && yarn install --frozen-lockfile
+      - name: Build Docusaurus site
+        run: cd website && yarn build
+
+  test-ecosystem-integration:
+    runs-on: ubuntu-latest
+    # Run if *any* service changed, as they are all integrated
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run E2E Acceptance Tests
+        run: pytest tests/ecosystem/acceptance/
